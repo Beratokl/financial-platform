@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTech Platform - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #667eea; }
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 { color: #666; font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .stat-card .value { font-size: 2rem; font-weight: bold; color: #333; }
+        .stat-card .change { color: #28a745; font-size: 0.9rem; margin-top: 0.5rem; }
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card h2 { margin-bottom: 1.5rem; color: #333; }
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .account-item:hover { background: #f8f9fa; }
+        .account-info h4 { color: #333; margin-bottom: 0.3rem; }
+        .account-info p { color: #666; font-size: 0.9rem; }
+        .account-balance { text-align: right; }
+        .account-balance .amount { font-size: 1.3rem; font-weight: bold; color: #28a745; }
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .transaction-info h4 { color: #333; font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .transaction-info p { color: #666; font-size: 0.85rem; }
+        .transaction-amount { text-align: right; }
+        .transaction-amount .amount { font-weight: bold; }
+        .amount.positive { color: #28a745; }
+        .amount.negative { color: #dc3545; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        button:hover { background: #5568d3; }
+        .quick-actions { display: flex; gap: 1rem; margin-top: 1rem; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-content h2 { margin-bottom: 1.5rem; }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">🏦 FinTech Platform</div>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <h3>TOTAL BALANCE</h3>
+                <div class="value" id="totalBalance">$0.00</div>
+                <div class="change">↑ All accounts</div>
+            </div>
+            <div class="stat-card">
+                <h3>ACCOUNTS</h3>
+                <div class="value" id="accountCount">0</div>
+                <div class="change">Active accounts</div>
+            </div>
+            <div class="stat-card">
+                <h3>TRANSACTIONS</h3>
+                <div class="value" id="transactionCount">0</div>
+                <div class="change">This month</div>
+            </div>
+            <div class="stat-card">
+                <h3>PENDING</h3>
+                <div class="value" id="pendingCount">0</div>
+                <div class="change">Awaiting approval</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div>
+                <div class="card">
+                    <h2>My Accounts</h2>
+                    <div class="quick-actions">
+                        <button onclick="openModal('newAccount')">+ New Account</button>
+                        <button onclick="openModal('transfer')">💸 Transfer Money</button>
+                    </div>
+                    <div id="accountsList"></div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h2>Recent Transactions</h2>
+                    <div id="transactionsList"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h2>Quick Actions</h2>
+                    <button onclick="openModal('deposit')" style="width: 100%;">💰 Deposit</button>
+                    <button onclick="openModal('withdraw')" style="width: 100%;">💵 Withdraw</button>
+                    <button onclick="openModal('transfer')" style="width: 100%;">🔄 Transfer</button>
+                    <button onclick="loadData()" style="width: 100%;">🔄 Refresh Data</button>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h2>Account Summary</h2>
+                    <div id="accountSummary"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Account Modal -->
+    <div id="newAccountModal" class="modal">
+        <div class="modal-content">
+            <h2>Create New Account</h2>
+            <div class="form-group">
+                <label>Account Type</label>
+                <select id="accountType">
+                    <option value="checking">Checking</option>
+                    <option value="savings">Savings</option>
+                    <option value="business">Business</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Currency</label>
+                <select id="currency">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                </select>
+            </div>
+            <button onclick="createAccount()">Create Account</button>
+            <button onclick="closeModal('newAccount')" style="background: #6c757d;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div id="transferModal" class="modal">
+        <div class="modal-content">
+            <h2>Transfer Money</h2>
+            <div class="form-group">
+                <label>From Account</label>
+                <select id="fromAccount"></select>
+            </div>
+            <div class="form-group">
+                <label>To Account</label>
+                <select id="toAccount"></select>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" id="transferAmount" placeholder="0.00" step="0.01">
+            </div>
+            <button onclick="makeTransfer()">Transfer</button>
+            <button onclick="closeModal('transfer')" style="background: #6c757d;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let accounts = [];
+        let payments = [];
+
+        async function init() {
+            // Get or create user
+            const users = await fetch('http://localhost:8004/users').then(r => r.json());
+            if (users.users && users.users.length > 0) {
+                currentUser = users.users[0];
+            } else {
+                currentUser = await createDefaultUser();
+            }
+            
+            document.getElementById('userName').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+            await loadData();
+        }
+
+        async function createDefaultUser() {
+            const response = await fetch('http://localhost:8004/users', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    email: 'demo@example.com',
+                    first_name: 'Demo',
+                    last_name: 'User',
+                    phone: '555-0000'
+                })
+            });
+            return response.json();
+        }
+
+        async function loadData() {
+            try {
+                // Load accounts
+                const accountsRes = await fetch(`http://localhost:8001/accounts/user/${currentUser.user_id}`);
+                const accountsData = await accountsRes.json();
+                accounts = accountsData.accounts || [];
+
+                // Load payments
+                const paymentsRes = await fetch('http://localhost:8002/payments');
+                const paymentsData = await paymentsRes.json();
+                payments = paymentsData.payments || [];
+
+                updateUI();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function updateUI() {
+            // Update stats
+            const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+            document.getElementById('totalBalance').textContent = `$${totalBalance.toFixed(2)}`;
+            document.getElementById('accountCount').textContent = accounts.length;
+            document.getElementById('transactionCount').textContent = payments.length;
+            document.getElementById('pendingCount').textContent = '0';
+
+            // Update accounts list
+            const accountsList = document.getElementById('accountsList');
+            if (accounts.length === 0) {
+                accountsList.innerHTML = '<div class="empty-state">No accounts yet. Create your first account!</div>';
+            } else {
+                accountsList.innerHTML = accounts.map(acc => `
+                    <div class="account-item">
+                        <div class="account-info">
+                            <h4>${acc.account_type.toUpperCase()} Account</h4>
+                            <p>ID: ${acc.account_id.substring(0, 8)}...</p>
+                        </div>
+                        <div class="account-balance">
+                            <div class="amount">$${acc.balance.toFixed(2)}</div>
+                            <p>${acc.currency}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update transactions list
+            const transactionsList = document.getElementById('transactionsList');
+            if (payments.length === 0) {
+                transactionsList.innerHTML = '<div class="empty-state">No transactions yet</div>';
+            } else {
+                transactionsList.innerHTML = payments.slice(0, 10).map(payment => `
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <h4>${payment.payment_type.toUpperCase()}</h4>
+                            <p>ID: ${payment.payment_id.substring(0, 8)}...</p>
+                        </div>
+                        <div class="transaction-amount">
+                            <div class="amount positive">$${payment.amount.toFixed(2)}</div>
+                            <p>${payment.status}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update account summary
+            const summary = document.getElementById('accountSummary');
+            summary.innerHTML = accounts.map(acc => `
+                <div style="margin-bottom: 1rem;">
+                    <strong>${acc.account_type}</strong><br>
+                    <span style="color: #28a745;">$${acc.balance.toFixed(2)}</span>
+                </div>
+            `).join('') || '<p>No accounts</p>';
+
+            // Update transfer dropdowns
+            updateTransferDropdowns();
+        }
+
+        function updateTransferDropdowns() {
+            const fromSelect = document.getElementById('fromAccount');
+            const toSelect = document.getElementById('toAccount');
+            
+            const options = accounts.map(acc => 
+                `<option value="${acc.account_id}">${acc.account_type} - $${acc.balance.toFixed(2)}</option>`
+            ).join('');
+            
+            fromSelect.innerHTML = options;
+            toSelect.innerHTML = options;
+        }
+
+        async function createAccount() {
+            const type = document.getElementById('accountType').value;
+            const currency = document.getElementById('currency').value;
+
+            const response = await fetch('http://localhost:8001/accounts', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    user_id: currentUser.user_id,
+                    account_type: type,
+                    currency: currency
+                })
+            });
+
+            if (response.ok) {
+                closeModal('newAccount');
+                await loadData();
+                alert('Account created successfully!');
+            }
+        }
+
+        async function makeTransfer() {
+            const fromAccount = document.getElementById('fromAccount').value;
+            const toAccount = document.getElementById('toAccount').value;
+            const amount = parseFloat(document.getElementById('transferAmount').value);
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            const response = await fetch('http://localhost:8002/payments', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    from_account: fromAccount,
+                    to_account: toAccount,
+                    amount: amount,
+                    currency: 'USD',
+                    payment_type: 'transfer'
+                })
+            });
+
+            if (response.ok) {
+                closeModal('transfer');
+                await loadData();
+                alert('Transfer completed successfully!');
+            }
+        }
+
+        function openModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'flex';
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'none';
+        }
+
+        function logout() {
+            alert('Logout functionality - would redirect to login page');
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

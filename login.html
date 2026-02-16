@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FinTech Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        .logo {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .demo-accounts {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        .demo-accounts h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .demo-user {
+            background: #f8f9fa;
+            padding: 0.8rem;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .demo-user:hover {
+            background: #e9ecef;
+        }
+        .demo-user strong {
+            color: #333;
+        }
+        .demo-user small {
+            color: #666;
+            display: block;
+            margin-top: 0.3rem;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🏦</div>
+        <h1>FinTech Platform</h1>
+        
+        <div id="errorMsg" class="error"></div>
+        <div id="successMsg" class="success"></div>
+        
+        <form onsubmit="login(event)">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="demo-accounts">
+            <h3>🎯 Quick Login (Demo Accounts)</h3>
+            <div class="demo-user" onclick="quickLogin('sarah.johnson@example.com')">
+                <strong>Sarah Johnson</strong>
+                <small>sarah.johnson@example.com</small>
+            </div>
+            <div class="demo-user" onclick="quickLogin('michael.chen@example.com')">
+                <strong>Michael Chen</strong>
+                <small>michael.chen@example.com</small>
+            </div>
+            <div class="demo-user" onclick="quickLogin('demo@example.com')">
+                <strong>Demo User</strong>
+                <small>demo@example.com</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function login(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                // In a real app, this would validate against a backend
+                // For demo, we'll just check if user exists
+                const response = await fetch('http://localhost:8004/users');
+                const data = await response.json();
+                
+                const user = data.users?.find(u => u.email === email);
+                
+                if (user) {
+                    // Store user info
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    localStorage.setItem('isAuthenticated', 'true');
+                    
+                    showSuccess('Login successful! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = 'frontend-dashboard.html';
+                    }, 1000);
+                } else {
+                    showError('User not found. Please use a demo account or create a new user.');
+                }
+            } catch (error) {
+                showError('Login failed. Make sure services are running.');
+            }
+        }
+
+        async function quickLogin(email) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = 'demo123';
+            
+            try {
+                const response = await fetch('http://localhost:8004/users');
+                const data = await response.json();
+                
+                let user = data.users?.find(u => u.email === email);
+                
+                // If user doesn't exist, create it
+                if (!user) {
+                    const names = email.split('@')[0].split('.');
+                    const createResponse = await fetch('http://localhost:8004/users', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            email: email,
+                            first_name: names[0].charAt(0).toUpperCase() + names[0].slice(1),
+                            last_name: names[1] ? names[1].charAt(0).toUpperCase() + names[1].slice(1) : 'User',
+                            phone: '555-' + Math.floor(1000 + Math.random() * 9000)
+                        })
+                    });
+                    user = await createResponse.json();
+                }
+                
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('isAuthenticated', 'true');
+                
+                showSuccess('Login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'frontend-dashboard.html';
+                }, 1000);
+            } catch (error) {
+                showError('Quick login failed. Make sure services are running.');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMsg');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('isAuthenticated') === 'true') {
+            window.location.href = 'frontend-dashboard.html';
+        }
+    </script>
+</body>
+</html>

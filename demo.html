@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Platform - Interactive Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; text-align: center; }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🏦 Financial Platform - Interactive Demo</h1>
+
+    <div class="container">
+        <h2>📋 Complete Workflow Demo</h2>
+        <p>Click the button below to run a complete demo: Create User → Create Account → Make Payment → Check Ledger</p>
+        <button onclick="runFullDemo()" id="demoBtn">🚀 Run Full Demo</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+
+    <div class="container">
+        <h2>🎯 Step-by-Step Demo</h2>
+        
+        <div class="step">
+            <h3>Step 1: Create User</h3>
+            <button onclick="createUser()">👤 Create User</button>
+            <div id="user-result"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Create Account</h3>
+            <button onclick="createAccount()" id="accountBtn" disabled>💰 Create Account</button>
+            <div id="account-result"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Make Payment</h3>
+            <button onclick="makePayment()" id="paymentBtn" disabled>💳 Make Payment</button>
+            <div id="payment-result"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Check Ledger</h3>
+            <button onclick="checkLedger()" id="ledgerBtn" disabled>📒 Check Ledger</button>
+            <div id="ledger-result"></div>
+        </div>
+    </div>
+
+    <script>
+        let userId = null;
+        let accountId = null;
+        let paymentId = null;
+
+        const sampleNames = [
+            {first: "Sarah", last: "Johnson", phone: "555-0101"},
+            {first: "Michael", last: "Chen", phone: "555-0202"},
+            {first: "Emily", last: "Rodriguez", phone: "555-0303"},
+            {first: "James", last: "Williams", phone: "555-0404"},
+            {first: "Maria", last: "Garcia", phone: "555-0505"},
+            {first: "David", last: "Brown", phone: "555-0606"},
+            {first: "Lisa", last: "Anderson", phone: "555-0707"},
+            {first: "Robert", last: "Taylor", phone: "555-0808"},
+            {first: "Jennifer", last: "Martinez", phone: "555-0909"},
+            {first: "William", last: "Lee", phone: "555-1010"}
+        ];
+
+        async function createUser() {
+            const resultDiv = document.getElementById('user-result');
+            resultDiv.innerHTML = '<div class="loading"></div> Creating user...';
+            
+            const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
+            
+            try {
+                const response = await fetch('http://localhost:8004/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: `${randomName.first.toLowerCase()}.${randomName.last.toLowerCase()}@example.com`,
+                        first_name: randomName.first,
+                        last_name: randomName.last,
+                        phone: randomName.phone
+                    })
+                });
+                
+                const data = await response.json();
+                userId = data.user_id;
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ User Created Successfully!
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    </div>
+                `;
+                
+                document.getElementById('accountBtn').disabled = false;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error: ${error.message}<br>
+                        Make sure User Profile Service is running on port 8004
+                    </div>
+                `;
+            }
+        }
+
+        async function createAccount() {
+            const resultDiv = document.getElementById('account-result');
+            resultDiv.innerHTML = '<div class="loading"></div> Creating account...';
+            
+            try {
+                const response = await fetch('http://localhost:8001/accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        account_type: "checking",
+                        currency: "USD"
+                    })
+                });
+                
+                const data = await response.json();
+                accountId = data.account_id;
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Account Created Successfully!
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    </div>
+                `;
+                
+                document.getElementById('paymentBtn').disabled = false;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error: ${error.message}<br>
+                        Make sure Accounts Service is running on port 8001
+                    </div>
+                `;
+            }
+        }
+
+        async function makePayment() {
+            const resultDiv = document.getElementById('payment-result');
+            resultDiv.innerHTML = '<div class="loading"></div> Processing payment...';
+            
+            try {
+                const response = await fetch('http://localhost:8002/payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        from_account: accountId,
+                        to_account: accountId,
+                        amount: 100.00,
+                        currency: "USD",
+                        payment_type: "transfer"
+                    })
+                });
+                
+                const data = await response.json();
+                paymentId = data.payment_id;
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Payment Completed Successfully!
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    </div>
+                `;
+                
+                document.getElementById('ledgerBtn').disabled = false;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error: ${error.message}<br>
+                        Make sure Payments Service is running on port 8002
+                    </div>
+                `;
+            }
+        }
+
+        async function checkLedger() {
+            const resultDiv = document.getElementById('ledger-result');
+            resultDiv.innerHTML = '<div class="loading"></div> Checking ledger...';
+            
+            try {
+                const response = await fetch('http://localhost:8003/ledger/entries', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        account_id: accountId,
+                        transaction_type: "payment",
+                        amount: 100.00,
+                        balance_after: 100.00,
+                        reference_id: paymentId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Ledger Entry Created!
+                        <div class="code">${JSON.stringify(data, null, 2)}</div>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error: ${error.message}<br>
+                        Make sure Ledger Service is running on port 8003
+                    </div>
+                `;
+            }
+        }
+
+        async function runFullDemo() {
+            const btn = document.getElementById('demoBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Running Demo...';
+            
+            await createUser();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await createAccount();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await makePayment();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await checkLedger();
+            
+            btn.disabled = false;
+            btn.innerHTML = '🚀 Run Full Demo';
+        }
+
+        function clearResults() {
+            document.getElementById('user-result').innerHTML = '';
+            document.getElementById('account-result').innerHTML = '';
+            document.getElementById('payment-result').innerHTML = '';
+            document.getElementById('ledger-result').innerHTML = '';
+            document.getElementById('accountBtn').disabled = true;
+            document.getElementById('paymentBtn').disabled = true;
+            document.getElementById('ledgerBtn').disabled = true;
+            userId = null;
+            accountId = null;
+            paymentId = null;
+        }
+    </script>
+</body>
+</html>

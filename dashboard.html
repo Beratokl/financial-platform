@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Platform Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .service {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-decoration: none;
+            display: block;
+            transition: background 0.3s;
+        }
+        .service:hover {
+            background: #0056b3;
+        }
+        .service h3 {
+            margin: 0 0 10px 0;
+        }
+        .service p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        .status {
+            background: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background: #ffc107;
+            color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Financial Platform</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Services Not Running Yet</strong><br>
+            To start the platform, open a terminal and run:<br>
+            <div class="code">docker-compose up -d</div>
+        </div>
+
+        <h2>📡 Service URLs</h2>
+        <p>Once services are running, click these links:</p>
+
+        <a href="http://localhost:8001/docs" class="service" target="_blank">
+            <h3>💰 Accounts Service</h3>
+            <p>http://localhost:8001/docs - Manage user accounts</p>
+        </a>
+
+        <a href="http://localhost:8002/docs" class="service" target="_blank">
+            <h3>💳 Payments Service</h3>
+            <p>http://localhost:8002/docs - Process payments and transfers</p>
+        </a>
+
+        <a href="http://localhost:8003/docs" class="service" target="_blank">
+            <h3>📒 Ledger Service</h3>
+            <p>http://localhost:8003/docs - Track all transactions</p>
+        </a>
+
+        <a href="http://localhost:8004/docs" class="service" target="_blank">
+            <h3>👤 User Profile Service</h3>
+            <p>http://localhost:8004/docs - Manage user profiles</p>
+        </a>
+
+        <a href="http://localhost:8090" class="service" target="_blank" style="background: #6c757d;">
+            <h3>🔐 Keycloak Admin</h3>
+            <p>http://localhost:8090 - Identity management (admin/admin)</p>
+        </a>
+
+        <h2>🚀 Quick Start</h2>
+        <div class="code">
+            # 1. Open terminal in VS Code<br>
+            # 2. Navigate to project folder<br>
+            cd c:\Users\User\Financial_platform<br><br>
+            
+            # 3. Start services<br>
+            docker-compose up -d<br><br>
+            
+            # 4. Wait 30 seconds, then refresh this page and click the links above
+        </div>
+    </div>
+</body>
+</html>
