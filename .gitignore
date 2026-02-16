@@ -8,6 +8,11 @@ env/
 venv/
 *.egg-info/
 
+# Environment variables
+.env
+.env.local
+*.env
+
 # Terraform
 *.tfstate
 *.tfstate.*
@@ -23,15 +28,24 @@ venv/
 *.swp
 *.swo
 
-# Environment
-.env
-.env.local
-
 # OS
 .DS_Store
 Thumbs.db
 
-# Secrets
+# Secrets & Credentials
 *.pem
 *.key
+*.crt
 secrets/
+credentials/
+*.credentials
+config/secrets.yaml
+
+# AWS
+.aws/
+*.tfvars
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
